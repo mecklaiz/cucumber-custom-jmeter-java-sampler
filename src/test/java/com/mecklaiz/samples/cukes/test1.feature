@@ -4,11 +4,28 @@ Feature: Basic Cucumber Test Template
 """
   Background:
     Given The following url:
-      |URL|PORT|Search Term|data1|data2|data3|
-      |https://www.google.com|80|cucumber|data1_1|data1_2|data1_3|
-      |www.google.com|443|/images|data2_1|data2_2|data2_3|
+      |ID|URL|PORT|PATH|data1|data2|data3|
+      |TST1|localhost|8085|/hello|data1_1|data1_2|data1_3|
+      |TST2|localhost|8085|/|data1_1|data1_2|data1_3|
+      |TST3|localhost|8085|/dump|data1_1|data1_2|data1_3|
+      |TST4|localhost|8085|/helloserv|data1_1|data1_2|data1_3|
 
-  Scenario: Perform a Google Search
-    Given There are 22 concurrent users using node
+  Scenario: Load the page and check the time taken
+    Given The ID TST1
+    When I load the page
     Then The response time is less than 1000ms
 
+  Scenario: Load the page and check the time taken
+    Given The ID TST2
+    When I load the page
+    Then The response time is less than 1000ms
+
+  Scenario: Load the page and check the time taken
+    Given The ID TST3
+    When I load the page
+    Then The response time is less than 1000ms
+
+  Scenario: Load the page and check the time taken
+    Given The ID TST4
+    When I load the page
+    Then The response time is less than 1000ms

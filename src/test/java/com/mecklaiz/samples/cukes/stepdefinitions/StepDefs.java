@@ -1,56 +1,73 @@
 package com.mecklaiz.samples.cukes.stepdefinitions;
 
+import com.mecklaiz.httpserver.jetty.ZServer;
 import cucumber.api.DataTable;
-import cucumber.api.PendingException;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
-import org.openqa.selenium.By;
+import cucumber.api.java.en.When;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
-import java.util.ArrayList;
+import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class StepDefs {
+
+    static WebDriver driver;
+
+    static Map<String, URL> dataMap = new HashMap<>();
+    static URL fullurl;
+    static boolean runOnce = false;
+
     @Given("^The following url:$")
     public void the_following_url(DataTable arg1) throws Throwable {
-//        System.out.println(arg1.asList(String.class));
-        List<Map<String, String>> args = arg1.asMaps(String.class, String.class);
-        for (Map m : args) {
-            System.out.println("List item: " + m);
-            for (Object key : m.keySet()) {
-                System.out.println("KEY: " + key);
-                System.out.println("VALS: " + m.get(key));
+
+        if (!runOnce) {
+            ZServer.startJetty();
+
+            Logger.getLogger("com.gargoylesoftware").setLevel(Level.OFF);
+
+            List<Map<String, String>> args = arg1.asMaps(String.class, String.class);
+
+            for (Map m : args) {
+                String url = (String) m.get("URL");
+                String id = (String) m.get("ID");
+                int port = Integer.parseInt((String) m.get("PORT"));
+                String path = (String) m.get("PATH");
+
+                fullurl = new URL("http", url, port, path);
+                dataMap.put(id, fullurl);
+                System.out.println("Putting: " + id + " " + fullurl.toString());
+
             }
+            driver = new HtmlUnitDriver();
+            runOnce = true;
         }
-
-        // Write code here that turns the phrase above into concrete actions
-        // For automatic transformation, change DataTable to one of
-        // List<YourType>, List<List<E>>, List<Map<K,V>> or Map<K,V>.
-        // E,K,V must be a scalar (String, Integer, Date, enum etc)
-
-        WebDriver driver = new HtmlUnitDriver();
-        driver.navigate().to("https://www.google.com");
-        driver.findElement(By.cssSelector("input[title=\"Google Search\"]")).sendKeys("cucumber");
-        driver.findElement(By.cssSelector("input[value=\"Google Search\"]")).click();
-        System.out.println(driver.getTitle() + " " + driver.findElement(By.id("resultStats")).getText());
-
-
-
     }
 
-    @Given("^There are (\\d+) concurrent users using node$")
-    public void there_are_concurrent_users_using_node(int arg1) throws Throwable {
+    @Given("^The ID (\\S+)$")
+    public void there_are_concurrent_users_using_node(String arg1) throws Throwable {
         // Write code here that turns the phrase above into concrete actions
-        System.out.println("I am here");
+
+        fullurl = dataMap.get(arg1);
+        System.out.println("I am here " + arg1 + " " + fullurl);
+    }
+
+    @When("^I load the page$")
+    public void i_load_the_page() throws Throwable {
+        driver.navigate().to(fullurl.toString());
+        System.out.println("CURRENT URL: " + driver.getCurrentUrl());
+        System.out.println("Page Source" + driver.getPageSource());
     }
 
     @Then("^The response time is less than (\\d+)ms$")
     public void the_response_time_is_less_than_ms(int arg1) throws Throwable {
         // Write code here that turns the phrase above into concrete actions
-        System.out.println("I am groot");
+//        System.out.println("CURRENT URL: " + driver.getCurrentUrl());
     }
 
 }
