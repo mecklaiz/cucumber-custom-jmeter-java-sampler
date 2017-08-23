@@ -1,10 +1,13 @@
 package com.mecklaiz.samples.cukes.stepdefinitions;
 
 import com.mecklaiz.httpserver.jetty.ZServer;
+import com.mecklaiz.jmeter.sampler.ZSeleniumSampler;
+import com.mecklaiz.jmeter.util.ZJMeterUtils;
 import cucumber.api.DataTable;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+import org.apache.jmeter.engine.StandardJMeterEngine;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
@@ -50,18 +53,23 @@ public class StepDefs {
     }
 
     @Given("^The ID (\\S+)$")
-    public void there_are_concurrent_users_using_node(String arg1) throws Throwable {
-        // Write code here that turns the phrase above into concrete actions
+    public void test_case_id(String arg1) throws Throwable {
 
         fullurl = dataMap.get(arg1);
         System.out.println("I am here " + arg1 + " " + fullurl);
+
     }
 
     @When("^I load the page$")
     public void i_load_the_page() throws Throwable {
+        String classname = "com.mecklaiz.jmeter.sampler.ZSeleniumSampler";
+
+        StandardJMeterEngine jmeter = ZJMeterUtils.doStandardJMeterSetup();
+        ZJMeterUtils.runJMeter(jmeter,classname, 2);
+
         driver.navigate().to(fullurl.toString());
         System.out.println("CURRENT URL: " + driver.getCurrentUrl());
-        System.out.println("Page Source" + driver.getPageSource());
+
     }
 
     @Then("^The response time is less than (\\d+)ms$")
